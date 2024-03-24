@@ -1,4 +1,4 @@
-# This project utilized data from the following Netflix dataset:
+# This project was written using the PostgreSQL dialect and utilized data from the following two Netflix datasets:
 
 CREATE TABLE netflix_titles_info
     ("show_id" varchar(5), "type" varchar(7), "title" varchar(58), "country" varchar(74), "date_added" timestamp, "release_year" int, "rating" varchar(5), "duration" varchar(9), "listed_in" varchar(74))
@@ -58,14 +58,7 @@ VALUES
     ('s20', NULL, 'Blanca SuÃ¡rez| IvÃ¡n Marcos| Ã“scar Casas| AdriÃ¡n Lastra| Francesc Garrido| Stefan Weinert| Julia MÃ¶ller| Alicia Chojnowski')
     ;
 
-# Analysis: 
-
-# Using PostegreSQL dialect, write a join to select a few columns from both Netflix tables at the same time. 
-SELECT people.show_id, titles.title, titles.country, people.cast
-FROM "netflix_titles_info" AS titles
-LEFT JOIN "netflix_people" AS people
-ON titles.show_id = people.show_id
-ORDER BY titles.country;
+# The following SQL was written to answer specific questions and reveal insights about the TV and movie content hosted on Netflix: 
 
 # How many movie titles are there in the database?
 SELECT COUNT(*)
@@ -92,10 +85,7 @@ WHERE titles.title = 'The Starling';
 SELECT title, release_year
 FROM "netflix_titles_info"
 WHERE type = 'Movie'
-AND release_year <= 
-	(SELECT MIN(release_year) 
+AND release_year <= (SELECT MIN(release_year) 
      FROM "netflix_titles_info" 
      WHERE type = 'Movie'); 
 
-
-    
