@@ -1,0 +1,128 @@
+#In this SQL code, I'm querying database called chinook to answer questions about the data. 
+# This database holds data from a digital media store and includes tables for artists, albums, media tracks, invoices, and customers.
+
+# Analysis: 
+
+# 1. Show the full names, customer IDs, and countries for customers who are not in the US.
+SELECT CustomerId, FirstName, LastName, Country
+FROM chinook.customers
+WHERE Country <> 'United States';
+
+# 2. Show only customers from Brazil.
+SELECT *
+FROM chinook.customers
+WHERE Country = 'Brazil';
+
+# 3. Find the invoices of customers who are from Brazil. 
+SELECT cust.FirstName, 
+  cust.LastName, 
+  inv.InvoiceId, 
+  inv.InvoiceDate, 
+  inv.BillingCountry
+FROM chinook.customers AS cust
+INNER JOIN chinook.invoices AS inv
+ON cust.CustomerId = inv.CustomerId 
+WHERE inv.BillingCountry = 'Brazil'; 
+
+# 4. Show the employees who are Sales Agents.
+SELECT *
+FROM chinook.employees
+WHERE Title like '%Sales%Agent%';
+
+# 5. Find a unique list of billing countries. 
+SELECT DISTINCT (BillingCountry) AS unique_countries
+FROM chinook.invoices; 
+
+# 6. Show the invoices associated with each sales agent. 
+SELECT employ.FirstName, 
+  employ.LastName, 
+  inv.InvoiceId
+FROM chinook.employees AS employ
+JOIN chinook.Customers AS cust 
+ON cust.SupportRepId = employ.EmployeeId
+JOIN chinook.Invoices AS inv 
+ON inv.CustomerId = cust.CustomerId;
+
+# 7. Show the invoice total, customer name, country, and sales agent name for all invoices and customers.
+SELECT cust.FirstName AS cust_first_name, 
+    cust.LastName AS cust_first_name, 
+    cust.Country, 
+    employ.FirstName AS employ_first_name, 
+    employ.LastName AS employ_last_name, 
+    inv.Total AS invoice_total
+FROM chinook.employees AS employ 
+INNER JOIN chinook.customers AS cust
+ON cust.SupportRepId = employ.EmployeeId 
+LEFT JOIN chinook.Invoices AS inv
+ON inv.CustomerId = cust.CustomerId;
+
+# 8. How many invoices were there in 2009?
+SELECT COUNT(*) AS count_invoices
+FROM chinook.invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+# 9. What were the total sales for 2009?
+SELECT ROUND(SUM(Total),2) AS invoice_total
+FROM chinook.invoices
+WHERE InvoiceDate like '%2009%';
+
+# 10. Show the purchased track name with each invoice line ID. 
+SELECT inv.InvoiceLineId, 
+  track.Name
+FROM chinook.invoice_items AS inv
+INNER JOIN chinook.tracks AS track
+ON inv.TrackId = track.TrackId;
+
+# 11. Write a query that includes the purchased track name AND artist name with each invoice line ID. 
+SELECT inv.InvoiceLineId, 
+    track.Name AS track, 
+    art.Name AS artist
+FROM chinook.invoice_items AS inv
+LEFT JOIN chinook.tracks AS track
+ON inv.TrackId = track.TrackId
+INNER JOIN chinook.albums AS album
+ON track.AlbumId = album.AlbumId
+LEFT JOIN chinook.artists AS art
+ON album.ArtistId = art.ArtistId;
+
+# 12. Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+SELECT t.Name AS track_name, 
+    a.Title AS album_name, 
+    m.Name AS media_type,
+    g.Name AS genre
+FROM chinook.tracks AS t
+INNER JOIN chinook.albums AS a
+ON a.AlbumID = t.AlbumId
+INNER JOIN chinook.Media_Types AS m
+ON m.MediaTypeId = t.MediaTypeId
+INNER JOIN chinook.Genres AS g
+ON g.GenreId = t.GenreId;
+
+# 13. Show total sales by each sales agent. 
+SELECT ROUND(SUM(i.Total),2) AS total_sales,
+    e.FirstName, 
+    e.LastName,
+    e.Title
+FROM chinook.employees AS e
+INNER JOIN chinook.customers as c
+ON c.SupportRepId = e.EmployeeId
+INNER JOIN chinook.invoices AS i
+ON i.CustomerId = c.CustomerId
+WHERE e.Title like '%Sales%Agent%'
+GROUP BY e.LastName;
+
+# 14. Which sales agent made the most dollars in sales in 2009?
+SELECT ROUND(SUM(i.Total),2) AS total_sales, 
+    e.FirstName, 
+    e.LastName,
+    e.Title
+FROM chinook.employees AS e
+INNER JOIN chinook.customers as c
+ON c.SupportRepId = e.EmployeeId
+INNER JOIN chinook.invoices AS i
+ON i.CustomerId = c.CustomerId
+WHERE e.Title like '%Sales%Agent%'
+AND InvoiceDate like '%2009%'
+GROUP BY e.LastName
+ORDER BY total_sales DESC
+LIMIT 1;
